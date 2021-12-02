@@ -1,0 +1,31 @@
+#setting up cache
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=my_cache:10m max_size=10g
+inactive=60m use_temp_path=off;
+
+
+upstream sdcgroup {
+  least_conn;
+  keepalive 800;
+  server 3.135.224.107:3000;
+  server 18.221.163.6:8000;
+  server 3.14.1.113:5000;
+  server 3.144.245.228:7000;
+}
+
+server {
+  listen 80 backlog=4096;
+  gzip on;
+  location /reviews {
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_pass http://sdcgroup;
+    proxy_cache my_cache;
+    proxy_cache_valid any 10m;
+    add_header X-Cache-Status $upstream_cache_status;
+  }
+  #loader.io
+  location /loaderio-143adc01dbab657b7a06a0db93edcbe7 {
+    return 200 'loaderio-143adc01dbab657b7a06a0db93edcbe7';
+  }
+
+}
